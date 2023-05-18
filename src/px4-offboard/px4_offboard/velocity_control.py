@@ -55,8 +55,9 @@ class OffboardControl(Node):
 
         self.nav_state = VehicleStatus.NAVIGATION_STATE_MAX
         self.dt = timer_period
-        self.velocity = Vector3()
+        self.velocity_cmd = Vector3()
         self.yaw = 0.0
+        self.yaw_rate_cmd = 0.0
 
     def vehicle_status_callback(self, msg):
         # TODO: handle NED->ENU transformation
@@ -67,7 +68,7 @@ class OffboardControl(Node):
     def offboard_velocity_callback(self, msg):
         # Store the received command without transforming it
         self.velocity_cmd = msg.linear
-        self.yaw_rate_cmd = msg.angular.z
+        self.yaw_rate_cmd = -msg.angular.z
 
     def attitude_callback(self, msg):
         orientation_q = msg.q
@@ -90,8 +91,9 @@ class OffboardControl(Node):
             # Compute velocity in the world frame
             cos_yaw = np.cos(self.trueYaw)
             sin_yaw = np.sin(self.trueYaw)
-            velocity_world_x = self.velocity.x * cos_yaw - self.velocity.y * sin_yaw
-            velocity_world_y = self.velocity.x * sin_yaw + self.velocity.y * cos_yaw
+            velocity_world_x = self.velocity_cmd.x * cos_yaw - self.velocity_cmd.y * sin_yaw
+            velocity_world_y = self.velocity_cmd.x * sin_yaw + self.velocity_cmd.y * cos_yaw
+
 
             # Create and publish Twist message
             # twist_msg = Twist()
@@ -99,11 +101,25 @@ class OffboardControl(Node):
             # self.publisher_velocity.publish(twist_msg)
 
             # Create and publish TrajectorySetpoint message with NaN values for position and acceleration
+            # trajectory_msg = TrajectorySetpoint()
+            # trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
+            # trajectory_msg.velocity[0] = velocity_world_x
+            # trajectory_msg.velocity[1] = velocity_world_y
+            # trajectory_msg.velocity[2] = self.velocity_cmd.z
+            # trajectory_msg.yawspeed = self.yaw_rate_cmd
+
             trajectory_msg = TrajectorySetpoint()
             trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
             trajectory_msg.velocity[0] = velocity_world_x
             trajectory_msg.velocity[1] = velocity_world_y
             trajectory_msg.velocity[2] = self.velocity_cmd.z
+            trajectory_msg.position[0] = float('nan')
+            trajectory_msg.position[1] = float('nan')
+            trajectory_msg.position[2] = float('nan')
+            trajectory_msg.acceleration[0] = float('nan')
+            trajectory_msg.acceleration[1] = float('nan')
+            trajectory_msg.acceleration[2] = float('nan')
+            trajectory_msg.yaw = self.yaw_rate_cmd
             trajectory_msg.yawspeed = self.yaw_rate_cmd
 
             self.publisher_trajectory.publish(trajectory_msg)

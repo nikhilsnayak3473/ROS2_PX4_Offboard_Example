@@ -60,10 +60,10 @@ moveBindings = {
     's': (0, 0, 1, 0),#Z-
     'a': (0, 0, 0, -1), #Yaw+
     'd': (0, 0, 0, 1),#Yaw-
-    chr(65) : (1, 0, 0, 0),  #Up Arrow
-    chr(66) : (-1, 0, 0, 0), #Down Arrow
-    chr(67) : (0, 1, 0, 0), #Right Arrow
-    chr(68) : (0, -1, 0, 0),  #Left Arrow
+    chr(65) : (-1, 0, 0, 0),  #Up Arrow
+    chr(66) : (1, 0, 0, 0), #Down Arrow
+    chr(67) : (0, -1, 0, 0), #Right Arrow
+    chr(68) : (0, 1, 0, 0),  #Left Arrow
 }
 
 speedBindings = {
