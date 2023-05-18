@@ -65,16 +65,9 @@ class OffboardControl(Node):
         self.nav_state = msg.nav_state
 
     def offboard_velocity_callback(self, msg):
-        # Implement your logic here
-        self.velocity = msg.linear
-        self.yaw = msg.angular.z
-
-        cos_yaw = np.cos(self.yaw)
-        sin_yaw = np.sin(self.yaw)
-        self.velocity.x = msg.linear.x * cos_yaw - msg.linear.y * sin_yaw
-        self.velocity.y = msg.linear.x * sin_yaw + msg.linear.y * cos_yaw
-        self.velocity.z = msg.linear.z
-        self.yaw = msg.angular.z
+        # Store the received command without transforming it
+        self.velocity_cmd = msg.linear
+        self.yaw_rate_cmd = msg.angular.z
 
     def attitude_callback(self, msg):
         orientation_q = msg.q
@@ -110,15 +103,8 @@ class OffboardControl(Node):
             trajectory_msg.timestamp = int(Clock().now().nanoseconds / 1000)
             trajectory_msg.velocity[0] = velocity_world_x
             trajectory_msg.velocity[1] = velocity_world_y
-            trajectory_msg.velocity[2] = self.velocity.z
-            trajectory_msg.position[0] = float('nan')
-            trajectory_msg.position[1] = float('nan')
-            trajectory_msg.position[2] = float('nan')
-            trajectory_msg.acceleration[0] = float('nan')
-            trajectory_msg.acceleration[1] = float('nan')
-            trajectory_msg.acceleration[2] = float('nan')
-            trajectory_msg.yaw = self.yaw
-            trajectory_msg.yawspeed = self.yaw
+            trajectory_msg.velocity[2] = self.velocity_cmd.z
+            trajectory_msg.yawspeed = self.yaw_rate_cmd
 
             self.publisher_trajectory.publish(trajectory_msg)
 
