@@ -69,9 +69,7 @@ def getKey(settings):
 
 
 def saveTerminalSettings():
-    if sys.platform == 'win32':
-        return None
-    return termios.tcgetattr(sys.stdin)
+    return None if sys.platform == 'win32' else termios.tcgetattr(sys.stdin)
 
 
 def restoreTerminalSettings(old_settings):
